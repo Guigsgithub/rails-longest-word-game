@@ -1,33 +1,32 @@
+require 'open-uri'
+require 'json'
+
 class GamesController < ApplicationController
   def new
     @letters = generate_grid(9)
   end
 
-  def score
-    if included?(params[:word])
-      if english_word?(params[:word])
-      @result = "<b>Congratulations!</b> #{params[:word].upcase} is a valid English word"
-      else
-      @result = "Sorry but #{params[:word].upcase} doesn't seem to be a valid English word..."
-      end
-    else
-      @result = "Sorry but #{params[:word].upcase} can't be build out of #{@letters}"
-    end
-  end
-
-  private
-
   def generate_grid(grid_size)
-    Array.new(grid_size) { ('A'..'Z').to_a.sample }
+    new_grid = Array.new(grid_size) { ('A'..'Z').to_a.sample }
   end
 
-  def included?(word)
-    # word.chars.all? { |letter| word.count(letter) <= @letters.count(letter) }
+  def new
+    @letters = generate_grid(9)
+  end
+
+  def score
+    @result = english_word?(params[:word])
+    r = params[:word].length
+    @count = new_grid.length
   end
 
   def english_word?(word)
     response = open("https://wagon-dictionary.herokuapp.com/#{word}")
     json = JSON.parse(response.read)
     json['found']
+  end
+
+  def included?(guess)
+    guess.chars.all? { |letter| guess.count(letter) <= @letters.count(letter) }
   end
 end
